@@ -54,4 +54,14 @@ buck-out/
 */fastlane/screenshots
 
 # Bundle artifact
-*.jsbundle
+*.bundle
+
+.buckconfig
+.babelrc
+.flowconfig
+.gitattributes
+.watchmanconfig
+android/keystores
+android/.settings
+android/app/.settings
+android/gradle
