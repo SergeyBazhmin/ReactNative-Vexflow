@@ -16,6 +16,18 @@ export default class Note extends XmlObject {
         //this.dots = this.noteLength >= 1 && this.noteLength % 1 === 0.5
     }
 
+    hasBeam() {
+        return this.childExists('beam')
+    }
+
+    hasAccidental() {
+        return this.childExists('accidental')
+    }
+
+    get beams() {
+        return this.getChildren('beam').map(b => b.textContent)
+    }
+
     get pitch() {
         const stepName = this.isUnpitched ? 'display-step' : 'step'
         const octaveName = this.isUnpitched ? 'display-octave' : 'octave'
@@ -65,6 +77,11 @@ export default class Note extends XmlObject {
 
     accept(visitor) {
         return visitor.visitNote(this)
+    }
+
+    toString() {
+        const note = this.pitch
+        return `${note.step}/${note.octave}`
     }
 
 }

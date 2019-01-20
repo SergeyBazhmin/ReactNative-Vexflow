@@ -8,6 +8,18 @@ export default class XmlObject {
         this.node = node
     }
 
+    get nextSibling() {
+        return this.node.nextSibling
+    }
+
+    get nextElementSibling() {
+        let curNode = this.node.nextSibling
+        while(curNode && curNode.nodeType !== 1) {
+            curNode = curNode.nextSibling
+        }
+        return curNode
+    }
+
     getChild(name) {
         return this.node.getElementsByTagName(name)[0]
     }

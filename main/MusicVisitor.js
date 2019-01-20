@@ -1,7 +1,9 @@
 import { Flow } from 'vexflow/src/tables'
 import MusicXmlError from '../xml/MusicXmlError';
 import { StaveNote } from 'vexflow/src/stavenote'
+import { Accidental } from 'vexflow/src/accidental'
 import { Stave } from 'vexflow/src/stave'
+import Note from '../xml/Note';
 
 class MusicVisitor {
     constructor() {
@@ -70,6 +72,8 @@ class MusicVisitor {
     }
 
     visitNote(note) {
+        const accidentals = []
+        if (note.hasAccidental()) accidentals.push(this.accidentals[note.accidental])
         const step = note.isRest ? 'b' : note.pitch.step
         const octave = note.isRest ? '4' : note.pitch.octave
         const type = this.noteTypes[note.type]
@@ -84,21 +88,32 @@ class MusicVisitor {
             vexParams.type = 'r'
         else if (note.clef !== undefined)
             vexParams.clef = this.visitClef(note.clef)
-        /*let nextNode = note.node.nextElementSibling
-        while(nextNode) {
-            if (nextNode.tagName === 'note') {
-                const curNote = new Note(nextNode)
-                if (curNote.isInChord)
-                    vexParams.keys.push(`${curNote.pitch.step}/${curNote.pitch.octave}`)
+        if (note.clef)
+        {
+            let node = note.nextElementSibling
+            while (node) {
+                const nextNote = new Note(node, [note.clef])
+                if (nextNote.isInChord)
+                {
+                    vexParams.keys.push(nextNote.toString())
+                    if (nextNote.hasAccidental()) 
+                        accidentals.push(this.accidentals[nextNote.accidental])
+                }
                 else
                     break
+                node = node.nextSibling
+                while(node && node.nodeType !== 1)
+                    node = node.nextSibling
             }
-            else
-                break
-        }*/
-        //vexParams['clef'] = 'treble'
+        }
 
         const vexFlowNote = new StaveNote(vexParams)
+
+        for(let idx = 0; i < accidentals.length; ++idx)
+        {
+            vexFlowNote.addAccidental(idx, new Accidental(sign))
+        }
+
         return vexFlowNote
     }
 

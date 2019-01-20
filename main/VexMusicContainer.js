@@ -16,10 +16,10 @@ export default class VexMusicContainer {
         })
     }
 
+    //TODO this works only with a single part => generalize
     adjust(options, formatter) {
         const { staveSpace, staveWidth, measuresPerStave, stavesPerPage } = options
         this.drawables.forEach(vexMeasure => {
-            //const part = measure.part
             const number = vexMeasure.number
             const lineOnPage = Math.ceil(number / measuresPerStave) - 1
             vexMeasure.page = Math.floor(lineOnPage / stavesPerPage)

@@ -9,7 +9,6 @@ export default class Measure extends XmlObject {
             throw new MusicXmlError('NotAMeasure', 'Wrong XML type')
         super(node)
         
-        this.attributes = {}
         this.notes = []
         this.part = part
 

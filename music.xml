@@ -1,7 +1,4 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<!DOCTYPE score-partwise PUBLIC
-    "-//Recordare//DTD MusicXML 3.1 Partwise//EN"
-    "http://www.musicxml.org/dtds/partwise.dtd">
 <score-partwise version="3.1">
   <part-list>
     <score-part id="P1">
@@ -35,10 +32,31 @@
       </note>
       <note>
         <pitch>
+          <step>E</step>
+          <octave>4</octave>
+        </pitch>
+        <chord/>
+        <voice>1</voice>
+        <duration>4</duration>
+        <type>quarter</type>
+      </note>
+      <note>
+        <pitch>
+          <step>G</step>
+          <octave>4</octave>
+        </pitch>
+        <chord/>
+        <voice>1</voice>
+        <duration>4</duration>
+        <type>quarter</type>
+      </note>
+      <note>
+        <pitch>
           <step>D</step>
           <octave>4</octave>
         </pitch>
         <voice>1</voice>
+        <accidental>sharp</accidental>
         <duration>4</duration>
         <type>quarter</type>
       </note>
@@ -68,6 +86,7 @@
           <octave>4</octave>
         </pitch>
         <voice>1</voice>
+        <beam number="1">begin</beam>
         <duration>4</duration>
         <type>eighth</type>
       </note>
@@ -77,6 +96,7 @@
           <octave>4</octave>
         </pitch>
         <voice>1</voice>
+        <beam number="1">end</beam>
         <duration>4</duration>
         <type>eighth</type>
       </note>

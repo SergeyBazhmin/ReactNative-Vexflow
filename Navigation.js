@@ -1,10 +1,10 @@
 import React from 'react';
-import {Text, View, Button, Picker, ToastAndroid} from 'react-native';
+import {Text, View, Button, Picker, ToastAndroid} from 'react-native'
 import {FileChooser, AndroidFS} from './NativePackages'
 import {createStackNavigator} from 'react-navigation'
 
-import VexMusicContainer from './main/VexMusicContainer';
-import Renderer from './main/Renderer';
+import VexMusicContainer from './main/VexMusicContainer'
+import Renderer from './main/Renderer'
 
 class HomeScreen extends React.Component {
   constructor(props) {
@@ -23,7 +23,7 @@ class HomeScreen extends React.Component {
       else if (response.error) {
         ToastAndroid.show(response.error, ToastAndroid.SHORT)
       }
-      else{
+      else {
         this.props.navigation.navigate('Score', {
           response
         })
@@ -64,7 +64,7 @@ class ScoreScreen extends React.Component {
       )
       const len = this.vexMusicContainer.drawables.length
       //ToastAndroid.show(this.renderer.options.stavesPerPage.toString(), ToastAndroid.SHORT)
-      ToastAndroid.show(this.vexMusicContainer.drawables[len-1].page.toString(), ToastAndroid.SHORT)
+      //ToastAndroid.show(this.vexMusicContainer.drawables[len-1].page.toString(), ToastAndroid.SHORT)
       this.setState({
         pages: this.vexMusicContainer.drawables[len-1].page
       })
@@ -93,8 +93,7 @@ class ScoreScreen extends React.Component {
         <Picker style={{ height: 50, width: 100 }} selectedValue={this.state.selectedPage} onValueChange={(page) => this.pageChanged(page)}>
           { 
             this.state.pages ?
-            indices
-              .map((num, idx) => (<Picker.Item label={num.toString()} value={num} key={idx} />)) 
+            indices.map((num, idx) => (<Picker.Item label={num.toString()} value={num} key={idx} />)) 
             :
             <Picker.Item label='0' value='0' />
           }
