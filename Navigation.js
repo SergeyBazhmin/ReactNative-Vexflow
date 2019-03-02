@@ -1,10 +1,11 @@
 import React from 'react';
-import {Text, View, Button, Picker, ToastAndroid} from 'react-native'
+import {Text, View, Button, Picker, ToastAndroid, TouchableOpacity, StyleSheet} from 'react-native'
 import {FileChooser, AndroidFS} from './NativePackages'
 import {createStackNavigator} from 'react-navigation'
 
 import VexMusicContainer from './main/VexMusicContainer'
 import Renderer from './main/Renderer'
+import { TextInput } from 'react-native-gesture-handler';
 
 class HomeScreen extends React.Component {
   constructor(props) {
@@ -32,7 +33,6 @@ class HomeScreen extends React.Component {
   }
 
   render() {
-    ToastAndroid.show('awesome', ToastAndroid.SHORT)
     return (
       <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
         <Text>Home Screen</Text>
@@ -47,7 +47,10 @@ class ScoreScreen extends React.Component {
     super(props);
     this.state = {
       pages: null,
-      selectedPage: 0
+      selectedPage: 0,
+      staves: null,
+      selectedStave: -1,
+      bpm: 120
     }
 
     this.vexMusicContainer = new VexMusicContainer()
@@ -77,9 +80,23 @@ class ScoreScreen extends React.Component {
     })
   }
 
-  pageChanged(page) {
+  _pageChanged(page) {
     this.setState({
       selectedPage: page,
+      selectedStave: -1,
+      staves: this.renderer.render(this.vexMusicContainer.getMeasuresOnPage(page))
+    })
+  }
+
+  _stavePressed(id) {
+    this.setState({
+      selectedStave: id
+    })
+  }
+
+  _handleInput(txt) {
+    this.setState({
+      bpm: txt == '' ? 0 : parseInt(txt)
     })
   }
 
@@ -90,15 +107,23 @@ class ScoreScreen extends React.Component {
 
     return (
       <View>
-        <Picker style={{ height: 50, width: 100 }} selectedValue={this.state.selectedPage} onValueChange={(page) => this.pageChanged(page)}>
-          { 
-            this.state.pages ?
-            indices.map((num, idx) => (<Picker.Item label={num.toString()} value={num} key={idx} />)) 
-            :
-            <Picker.Item label='0' value='0' />
-          }
-        </Picker>
-        {this.renderer.render(this.vexMusicContainer.getMeasuresOnPage(this.state.selectedPage))}
+        <View style = {styles.head}>
+          <Picker style={{width: 100}}selectedValue={this.state.selectedPage} onValueChange={(page) => this._pageChanged(page)}>
+            { 
+              this.state.pages ?
+              indices.map((num, idx) => (<Picker.Item label={num.toString()} value={num} key={idx} />)) 
+              :
+              <Picker.Item label='0' value='0' />
+            }
+          </Picker>
+          <TextInput style={styles.bpmInput} placeholder='bpm' onChangeText={(txt) => this._handleInput(txt)} value={this.state.bpm}></TextInput>
+        </View>
+        <View>
+          {this.state.staves ? this.state.staves.map((svgElement, idx) => 
+            (<View style={idx == this.state.selectedStave ? styles.chosenStave : {}}>
+              <TouchableOpacity onPress = {(e) => this._stavePressed(idx)}>{svgElement}</TouchableOpacity>
+            </View>)) : null }
+        </View>
       </View>
     )
   }
@@ -117,4 +142,22 @@ const AppNavigator = createStackNavigator({
     initialRouteName: 'Home'
   }
 )
+
+const styles = StyleSheet.create({
+  chosenStave: {
+    borderColor: 'red',
+    borderWidth: 1
+  },
+  head: {
+    display: 'flex',
+    justifyContent: 'space-between',
+    flexDirection:'row'
+  },
+  bpmInput: {
+    borderColor: '#7a42f4',
+    borderWidth: 1,
+    width:100
+ },
+})
+
 export default AppNavigator

@@ -19,6 +19,7 @@ export default class VexMusicContainer {
     //TODO this works only with a single part => generalize
     adjust(options, formatter) {
         const { staveSpace, staveWidth, measuresPerStave, stavesPerPage } = options
+        let counter = 1;
         this.drawables.forEach(vexMeasure => {
             const number = vexMeasure.number
             const lineOnPage = Math.ceil(number / measuresPerStave) - 1
@@ -26,7 +27,9 @@ export default class VexMusicContainer {
             const x = (number - 1) % measuresPerStave * staveWidth
             const y = lineOnPage % stavesPerPage * staveSpace
             vexMeasure.staveList.forEach((stave,idx) => {
-                stave.setX(x).setY(y + idx * staveSpace).setWidth(staveWidth)
+                //stave.setX(x).setY(y + idx * staveSpace).setWidth(staveWidth)
+                stave.setX(x).setY(0).setWidth(staveWidth).setText(`stave #${counter}`, 3)
+                ++counter;
                 if ((number-1) % measuresPerStave === 0)
                 {
                     let staveClef = vexMeasure.getClefByStaff(idx)

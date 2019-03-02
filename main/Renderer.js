@@ -1,10 +1,9 @@
 import { Formatter } from 'vexflow/src/formatter'
 import { ReactNativeSVGContext, NotoFontPack } from 'standalone-vexflow-context'
 import { Dimensions } from 'react-native'
-import { RenderError } from './RenderError'
-//import { vexConverter } from './MusicVisitor'
 import { Stave } from 'vexflow/src/stave'
 import { Header } from 'react-navigation'
+
 
 export default class Renderer {
     constructor() {
@@ -15,15 +14,17 @@ export default class Renderer {
     render(drawables) {
         if (drawables === undefined)
             return
-        //TODO find out how to reuse the same context? delete react children?
-        context = new ReactNativeSVGContext(NotoFontPack, {
-            width: this.options.screenWidth,
-            height: this.options.screenHeight - Header.HEIGHT - 50 //TODO replace this magic number
-        })
+
+        attachedComponents = []
         drawables.forEach(object => {
+            context = new ReactNativeSVGContext(NotoFontPack, {
+                width: this.options.screenWidth,
+                height: this.options.staveSpace 
+            })
             object.draw(context)
+            attachedComponents.push(context.render())
         })
-        return context.render()
+        return attachedComponents
     }
 
     _calculateLayout() {

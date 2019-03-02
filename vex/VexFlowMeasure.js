@@ -1,7 +1,6 @@
 import { vexConverter } from '../main/MusicVisitor'
 import { Voice } from 'vexflow/src/voice'
 import { Beam } from 'vexflow/src/beam'
-import { ToastAndroid } from 'react-native'
 
 export default class VexFlowMeasure {
     constructor(xmlMeasure) {
