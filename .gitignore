@@ -65,3 +65,5 @@ android/keystores
 android/.settings
 android/app/.settings
 android/gradle
+
+android/app/src/main/res/drawable-mdpi/*

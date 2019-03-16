@@ -1,36 +1,36 @@
-import XmlObject from './XmlObject'
-import Key from './Key'
-import Clef from './Clef'
-import Time from './Time'
+import XmlObject from './XmlObject';
+import Key from './Key';
+import Clef from './Clef';
+import Time from './Time';
 
 export default class Attributes extends XmlObject {
     constructor(node) {
-        super(node)
+        super(node);
         if (node.tagName !== 'attributes')
-            throw new MusicXmlError('NotAttributes', 'Wrong XML type')
+            throw new MusicXmlError('NotAttributes', 'Wrong XML type');
     }
 
     get divisions() {
-        const dv = this.getNumber('divisions')
-        return Number.isNaN(dv) ? 1 : dv
+        const dv = this.getNumber('divisions');
+        return Number.isNaN(dv) ? 1 : dv;
     }
 
     get staves() {
-        const st = this.getNumber('staves')
-        return Number.isNaN(st) ? 1 : st
+        const st = this.getNumber('staves');
+        return Number.isNaN(st) ? 1 : st;
     }
 
     get key() {
-        return new Key(this.getChild('key'))
+        return new Key(this.getChild('key'));
     }
 
     get time() {
-        return new Time(this.getChild('time'))
+        return new Time(this.getChild('time'));
     }
 
     get clefs() {
-        const clef = this.getChildren('clef')
-        return [...clef.map(c => new Clef(c))]
+        const clef = this.getChildren('clef');
+        return [...clef.map(c => new Clef(c))];
     }
 
 
@@ -39,6 +39,6 @@ export default class Attributes extends XmlObject {
         `Time\t-> ${this.time}\n` +
         `Staves\t-> ${this.staves}\n` +
         `Key\t-> ${this.key}\n` +
-        `Clef\t-> ${this.clef}`
+        `Clef\t-> ${this.clef}`;
     }
 }

@@ -3,60 +3,60 @@ export default class XmlObject {
     {
         if (!node || !node.nodeType)
         {
-            throw new Error(`The node ${node} is not a valid DOM Node`)
+            throw new Error(`The node ${node} is not a valid DOM Node`);
         }
-        this.node = node
+        this.node = node;
     }
 
     get nextSibling() {
-        return this.node.nextSibling
+        return this.node.nextSibling;
     }
 
     get nextElementSibling() {
-        let curNode = this.node.nextSibling
+        let curNode = this.node.nextSibling;
         while(curNode && curNode.nodeType !== 1) {
-            curNode = curNode.nextSibling
+            curNode = curNode.nextSibling;
         }
-        return curNode
+        return curNode;
     }
 
     getChild(name) {
-        return this.node.getElementsByTagName(name)[0]
+        return this.node.getElementsByTagName(name)[0];
     }
 
     getChildren(name = '') {
-        return name === '' ? Array.from(this.node.childNodes) : Array.from(this.node.getElementsByTagName(name))
+        return name === '' ? Array.from(this.node.childNodes) : Array.from(this.node.getElementsByTagName(name));
     }
 
     getSiblings(name){
-        return Array.from(this.node.parentNode.getElementsByTagName(name))
+        return Array.from(this.node.parentNode.getElementsByTagName(name));
     }
 
     childExists(name) {
-        return this.node.getElementsByTagName(name)[0] !== undefined
+        return this.node.getElementsByTagName(name)[0] !== undefined;
     }
 
     getAttribute(name) {
-        return this.node.getAttribute(name)
+        return this.node.getAttribute(name);
     }
 
     getText(name) {
-        let txt = ''
+        let txt = '';
         if (this.childExists(name)) {
-            const kids = this.getChildren(name)
+            const kids = this.getChildren(name);
             for(let i = 0; i < kids.length; ++i)
-                txt += kids[i].textContent + '\n'
+                txt += kids[i].textContent + '\n';
         }
-        return txt.trim()
+        return txt.trim();
     }
 
     getNumber(name) {
-        let res = NaN
+        let res = NaN;
         if (this.childExists(name))
         {
-            const kid = this.getChild(name)
-            res = parseFloat(kid.textContent)
+            const kid = this.getChild(name);
+            res = parseFloat(kid.textContent);
         }
-        return res
+        return res;
     }
 }

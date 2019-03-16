@@ -1,6 +1,11 @@
 package com.nativejs;
 
 import android.net.Uri;
+import android.app.Activity;
+import android.content.pm.PackageManager;
+import android.support.v4.app.ActivityCompat;
+import android.Manifest;
+import android.content.Intent;
 //import android.util.Base64;
 
 import java.io.FileNotFoundException;

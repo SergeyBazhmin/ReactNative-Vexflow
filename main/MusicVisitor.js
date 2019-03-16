@@ -1,13 +1,16 @@
-import { Flow } from 'vexflow/src/tables'
+import { Flow } from 'vexflow/src/tables';
 import MusicXmlError from '../xml/MusicXmlError';
-import { StaveNote } from 'vexflow/src/stavenote'
-import { Accidental } from 'vexflow/src/accidental'
-import { Stave } from 'vexflow/src/stave'
+import { StaveNote } from 'vexflow/src/stavenote';
+import { Accidental } from 'vexflow/src/accidental';
+import { Articulation } from 'vexflow/src/articulation';
+import { Stave } from 'vexflow/src/stave';
 import Note from '../xml/Note';
+import { ToastAndroid } from 'react-native';
 
 class MusicVisitor {
     constructor() {
-         this.clefTypes = {
+        //look vexflow/src/table.js for types
+        this.clefTypes = {
             'F4': 'bass',
             'G2': 'treble',
             'C3': 'alto',
@@ -17,13 +20,20 @@ class MusicVisitor {
             'C5': 'baritone',
             'F3': 'baritone',
             'percussion': 'percussion'
-        }
+        };
+
+        this.articulations = {
+            'staccato': 'a.',
+            'staccatissimo': 'av',
+            'accent': 'a>',
+            'tenuto': 'a-'
+        };
 
         this.accidentals = {
             'natural': 'n',
             'flat': 'b',
             'sharp': '#'
-        }
+        };
 
         this.noteTypes = {
             'whole': 'w',
@@ -37,14 +47,14 @@ class MusicVisitor {
             '256th': '256',
             '512th': '512',
             '1024th': '1024'
-        }
+        };
 
-        this.keySpec = []
+        this.keySpec = [];
         for (const k in Flow.keySignature.keySpecs) {
             if ({}.hasOwnProperty.call(Flow.keySignature.keySpecs, k)) {
-                const newEntry = Flow.keySignature.keySpecs[k]
-                newEntry.name = k
-                this.keySpec.push(newEntry)
+                const newEntry = Flow.keySignature.keySpecs[k];
+                newEntry.name = k;
+                this.keySpec.push(newEntry);
             }
         }
     }
@@ -53,79 +63,93 @@ class MusicVisitor {
         return {
             beats: time.beats,
             beatType: time.beatType
-        }
+        };
     }
 
     visitClef(clef) {
-        return this.clefTypes[`${clef.sign}${clef.line}`]
+        return this.clefTypes[`${clef.sign}${clef.line}`];
     }
 
     visitKey(key) {
-        let filteredKeys = this.keySpec.filter(k => k.num === Math.abs(key.fifths))
-        const mode = key.mode === 'major' ? 0 : 1
+        let filteredKeys = this.keySpec.filter(k => k.num === Math.abs(key.fifths));
+        const mode = key.mode === 'major' ? 0 : 1;
         if (key.fifths < 0)
-            filteredKeys = filteredKeys.filter(k => k.acc === 'b')
+            filteredKeys = filteredKeys.filter(k => k.acc === 'b');
         else if (key.fifths > 0)
-            filteredKeys = filteredKeys.filter(k => k.acc === '#')
-        const entry = filteredKeys[mode].name
-        return entry
+            filteredKeys = filteredKeys.filter(k => k.acc === '#');
+        const entry = filteredKeys[mode].name;
+        return entry;
     }
 
     visitNote(note) {
-        const accidentals = []
-        if (note.hasAccidental()) accidentals.push(this.accidentals[note.accidental])
-        const step = note.isRest ? 'b' : note.pitch.step
-        const octave = note.isRest ? '4' : note.pitch.octave
-        const type = this.noteTypes[note.type]
+        const accidentals = [];
+        if (note.hasAccidental()) accidentals.push(this.accidentals[note.accidental]);
+        const step = note.isRest ? 'b' : note.pitch.step;
+        const octave = note.isRest ? '4' : note.pitch.octave;
+        let type = this.noteTypes[note.type];
+        if (note.hasDot()) type += 'd';
 
         if (type === undefined)
-            throw new MusicXmlError('BadType', 'Invalid note type')
+            throw new MusicXmlError('BadType', 'Invalid note type');
         const vexParams = {
             keys: [`${step}/${octave}`],
             duration: type
-        }
+        };
         if (note.isRest)
-            vexParams.type = 'r'
+            vexParams.type = 'r';
         else if (note.clef !== undefined)
-            vexParams.clef = this.visitClef(note.clef)
+            vexParams.clef = this.visitClef(note.clef);
         if (note.clef)
         {
-            let node = note.nextElementSibling
+            let node = note.nextElementSibling;
             while (node) {
-                const nextNote = new Note(node, [note.clef])
+                const nextNote = new Note(node, [note.clef]);
                 if (nextNote.isInChord)
                 {
-                    vexParams.keys.push(nextNote.toString())
-                    if (nextNote.hasAccidental()) 
-                        accidentals.push(this.accidentals[nextNote.accidental])
+                    vexParams.keys.push(nextNote.toString());
+                    if (nextNote.hasAccidental()) ;
+                        accidentals.push(this.accidentals[nextNote.accidental]);
                 }
                 else
-                    break
-                node = node.nextSibling
+                    break;
+                node = node.nextSibling;
                 while(node && node.nodeType !== 1)
-                    node = node.nextSibling
+                    node = node.nextSibling;
             }
         }
 
-        const vexFlowNote = new StaveNote(vexParams)
+        const vexFlowNote = new StaveNote(vexParams);
 
         for(let idx = 0; i < accidentals.length; ++idx)
         {
-            vexFlowNote.addAccidental(idx, new Accidental(sign))
+            vexFlowNote.addAccidental(idx, new Accidental(sign));
         }
 
-        return vexFlowNote
+        if (note.hasArticulations()) {
+            const arts = note.articulations;
+            arts.forEach(art => {
+                if (art.type in this.articulations) {
+                    vexFlowNote.addArticulation(0, new Articulation(this.articulations[art.type]));
+                }
+            });
+        }
+        
+        if (note.hasDot()) {
+            vexFlowNote.addDotToAll();
+        }
+
+        return vexFlowNote;
     }
 
     visitMeasure(measure) {
-        const staveList = []
-        const allStaves = measure.staves
+        const staveList = [];
+        const allStaves = measure.staves;
         for (let s = 0; s < allStaves; ++s) {
-            const vexFlowStave = new Stave()
-            staveList.push(vexFlowStave)
+            const vexFlowStave = new Stave();
+            staveList.push(vexFlowStave);
         }
-        return staveList
+        return staveList;
     }
 }
 
-export const vexConverter = new MusicVisitor()
+export const vexConverter = new MusicVisitor();
