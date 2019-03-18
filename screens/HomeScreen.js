@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { FileChooser, GRP, MicrophoneListener } from './NativePackages';
+import { FileChooser, MicrophoneListener } from '../NativePackages';
 import { View, Button, ToastAndroid, AsyncStorage } from 'react-native';
 import { ScrollView } from 'react-native-gesture-handler';
 import { Card } from 'react-native-elements';
@@ -15,13 +15,13 @@ export default class HomeScreen extends Component {
           items: []
       };
 	  
-	  MicrophoneListener.setBufferSize(1024);//С‚РѕС‚ СЃР°РјС‹Р№ СЂР°Р·РјРµСЂ Р±СѓС„РµСЂР°, РєРѕС‚РѕСЂС‹Р№ РЅР°РґРѕ Р·Р°РґР°РІР°С‚СЊ
+	  MicrophoneListener.setBufferSize(1024);//тот самый размер буфера, который надо задавать
 	  DeviceEventEmitter.addListener('onNewSoundData', (e)=>{ this.onNewSoundData(e);});
     }
 	
 	onNewSoundData(e){
 	   var data = e.data;
-	   //СЃСЋРґР° РїСЂРёСЃС‹Р»Р°СЋС‚СЃСЏ РґР°РЅРЅС‹Рµ. РџРѕР»СѓС‡Р°С‚СЊ data[index]. Р Р°Р·РјРµСЂР° РѕРЅ, РєРѕС‚РѕСЂС‹Р№ Р±С‹Р»С‹ Р·Р°РґР°РЅ, С‚Рѕ РµСЃС‚СЊ 1024
+	   //сюда присылаются данные. Получать data[index]. Размера он, который былы задан, то есть 1024
     }
 	 
 	start(){
