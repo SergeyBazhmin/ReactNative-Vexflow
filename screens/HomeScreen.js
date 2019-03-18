@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { FileChooser, GRP } from './NativePackages';
+import { FileChooser } from '../NativePackages';
 import { View, Button, ToastAndroid, AsyncStorage } from 'react-native';
 import { ScrollView } from 'react-native-gesture-handler';
 import { Card } from 'react-native-elements';

@@ -12,6 +12,7 @@
     "react-native-elements": "^1.1.0",
     "react-native-file-chooser": "^0.2.0",
     "react-native-gesture-handler": "^1.0.12",
+    "react-native-material-menu": "^0.4.2",
     "react-native-svg": "^9.0.0",
     "react-native-vector-icons": "^6.3.0",
     "react-navigation": "^3.0.7",

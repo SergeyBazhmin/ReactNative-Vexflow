@@ -1,6 +1,6 @@
 import {createStackNavigator} from 'react-navigation';
-import HomeScreen from './HomeScreen';
-import ScoreScreen from './ScoreScreen';
+import HomeScreen from './screens/HomeScreen';
+import ScoreScreen from './screens/ScoreScreen';
 
 export default AppNavigator = createStackNavigator({
     Home:{

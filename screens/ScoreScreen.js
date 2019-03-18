@@ -1,12 +1,28 @@
 import React from 'react';
-import { View, Button, Picker, ToastAndroid, TouchableOpacity, StyleSheet} from 'react-native';
-import { AndroidFS } from './NativePackages';
+import { View, Button, Picker, ToastAndroid, TouchableOpacity, StyleSheet, Text } from 'react-native';
+import { AndroidFS } from '../NativePackages';
 
-import VexMusicContainer from './main/VexMusicContainer';
-import Renderer from './main/Renderer';
+import VexMusicContainer from '../main/VexMusicContainer';
+import Renderer from '../main/Renderer';
 import { TextInput } from 'react-native-gesture-handler';
+import Menu, { MenuItem } from 'react-native-material-menu';
 
 export default class ScoreScreen extends React.Component {
+  static navigationOptions = ({ navigation }) => {
+    return {
+      headerTitle: 'Score',
+      headerRight: (
+        <View style={{paddingRight: 10}}>
+          <Menu ref={navigation.getParam('_setMenuRef')}
+          button={<Text style={{fontSize: 20}} onPress={navigation.getParam('_showMenu')}>Mode</Text>}>
+                <MenuItem>Timer</MenuItem>
+                <MenuItem>Listen</MenuItem>
+          </Menu>
+        </View>
+      ),
+    };
+  }
+
   constructor(props) {
     super(props);
     this.state = {
@@ -17,11 +33,21 @@ export default class ScoreScreen extends React.Component {
       bpm: 120,
       listening: false
     };
+
+    this._showMenu = this._showMenu.bind(this);
+    this._setMenuRef = this._setMenuRef.bind(this);
   }
 
   componentDidMount() {
+    this.props.navigation.setParams({
+      _setMenuRef: this._setMenuRef,
+      _showMenu: this._showMenu,
+      //_hideMenu: this._hideMenu
+    });
+
     this.vexMusicContainer = new VexMusicContainer();
     this.renderer = new Renderer();
+    this._menu = null;
 
 
     const uri = this.props.navigation.getParam('uri');
@@ -33,7 +59,6 @@ export default class ScoreScreen extends React.Component {
         this.renderer.formatter
       );
       const len = this.vexMusicContainer.drawables.length;
-      //ToastAndroid.show(this.vexMusicContainer.drawables[len-1].page.toString(), ToastAndroid.SHORT);
       this.setState({
         pages: this.vexMusicContainer.drawables[len-1].page+1
       });
@@ -43,7 +68,20 @@ export default class ScoreScreen extends React.Component {
     });
   }
 
+  _setMenuRef(ref) {
+    this._menu = ref;
+  }
+
+  // _hideMenu() {
+  //   this._menu.hide();
+  // }
+
+  _showMenu() {
+    this._menu.show();
+  }
+
   _pageChanged(page, selectFirst=false) {
+    ToastAndroid.show(page.toString(), ToastAndroid.SHORT);
     this.setState({
       selectedPage: page,
       selectedStave: selectFirst ? 0 : -1,
@@ -123,7 +161,7 @@ export default class ScoreScreen extends React.Component {
     return (
       <View style={{flex: 1}}>
         <View style = {styles.head}>
-          <Picker style={{width: 100}} selectedValue={this.state.selectedPage} onValueChange={(page) => this._pageChanged(page-1)}>
+          <Picker style={{width: 100}} selectedValue={this.state.selectedPage + 1} onValueChange={(page) => this._pageChanged(page-1)}>
             { 
               this.state.pages ?
               indices.map((num, idx) => (<Picker.Item label={num.toString()} value={num} key={idx} />)) 
@@ -142,7 +180,7 @@ export default class ScoreScreen extends React.Component {
         <View style={styles.listenButton}>
           { this.state.listening ? <Button title="Stop" onPress={() => this._stopTimer()} />
           : <Button title="Listen" onPress={() => this._startTimer()}/> }
-         </View>
+        </View>
       </View>
     );
   }
@@ -162,7 +200,7 @@ const styles = StyleSheet.create({
     borderColor: '#7a42f4',
     borderWidth: 1,
     width:100
- },
+  },
   listenButton: {
     position: 'absolute',
     right: 0,
