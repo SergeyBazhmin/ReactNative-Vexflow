@@ -32,7 +32,8 @@ public class MainApplication extends Application implements ReactApplication {
           new SvgPackage(),
           new RNGestureHandlerPackage(),
           new FileChooserPackage(),
-          new IOPackage()
+          new IOPackage(),
+		  new MicrophonePackage()
       );
     }
 
