@@ -15,23 +15,22 @@ export default class HomeScreen extends Component {
           items: []
       };
 	  
-	  MicrophoneListener.setBufferSize(1024);//тот самый размер буфера, который надо задавать
+	  MicrophoneListener.setBufferSize(1024);
 	  DeviceEventEmitter.addListener('onNewSoundData', (e)=>{ this.onNewSoundData(e);});
     }
 	
-	onNewSoundData(e){
-	   var data = e.data;
-	   //сюда присылаютс€ данные. ѕолучать data[index]. –азмера он, который былы задан, то есть 1024
+    onNewSoundData(e) {
+      var data = e.data;
     }
-	 
-	start(){
-		MicrophoneListener.start();
-	}
-  
-	stop(){
-		MicrophoneListener.stop();
-	}
-	
+    
+    start() {
+      MicrophoneListener.start();
+    }
+    
+    stop() {
+      MicrophoneListener.stop();
+    }
+    
     async componentWillMount() {
         try {
             const keys = await AsyncStorage.getAllKeys();

@@ -15,8 +15,8 @@ export default class ScoreScreen extends React.Component {
         <View style={{paddingRight: 10}}>
           <Menu ref={navigation.getParam('_setMenuRef')}
           button={<Text style={{fontSize: 20}} onPress={navigation.getParam('_showMenu')}>Mode</Text>}>
-                <MenuItem>Timer</MenuItem>
-                <MenuItem>Listen</MenuItem>
+                <MenuItem onPress={navigation.getParam('_hideMenu')}>Timer</MenuItem>
+                <MenuItem onPress={navigation.getParam('_hideMenu')}>Listen</MenuItem>
           </Menu>
         </View>
       ),
@@ -36,13 +36,14 @@ export default class ScoreScreen extends React.Component {
 
     this._showMenu = this._showMenu.bind(this);
     this._setMenuRef = this._setMenuRef.bind(this);
+    this._hideMenu = this._hideMenu.bind(this);
   }
 
   componentDidMount() {
     this.props.navigation.setParams({
       _setMenuRef: this._setMenuRef,
       _showMenu: this._showMenu,
-      //_hideMenu: this._hideMenu
+      _hideMenu: this._hideMenu
     });
 
     this.vexMusicContainer = new VexMusicContainer();
@@ -72,9 +73,17 @@ export default class ScoreScreen extends React.Component {
     this._menu = ref;
   }
 
-  // _hideMenu() {
-  //   this._menu.hide();
-  // }
+  _hideMenu() {
+    this._menu.hide();
+    const notes = this.vexMusicContainer.allNotes; //new property
+    let str = '';
+    const measureIdx = 0;
+    notes[measureIdx].forEach(note => {
+       str += note.duration.toString();
+       //note.keys ... 'D/4', 'F/4' etc
+     });
+     ToastAndroid.show(str, ToastAndroid.SHORT);
+  }
 
   _showMenu() {
     this._menu.show();

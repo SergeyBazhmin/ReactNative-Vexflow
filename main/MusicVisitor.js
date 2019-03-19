@@ -88,16 +88,14 @@ class MusicVisitor {
         const octave = note.isRest ? '4' : note.pitch.octave;
         let type = this.noteTypes[note.type];
         if (note.hasDot()) type += 'd';
-
+        if (note.isRest) type += 'r';
         if (type === undefined)
             throw new MusicXmlError('BadType', 'Invalid note type');
         const vexParams = {
             keys: [`${step}/${octave}`],
             duration: type
         };
-        if (note.isRest)
-            vexParams.type = 'r';
-        else if (note.clef !== undefined)
+        if (note.clef !== undefined)
             vexParams.clef = this.visitClef(note.clef);
         if (note.clef)
         {
