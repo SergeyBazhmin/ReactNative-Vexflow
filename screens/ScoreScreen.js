@@ -1,6 +1,6 @@
 import React from 'react';
 import { View, Button, Picker, ToastAndroid, TouchableOpacity, StyleSheet, Text } from 'react-native';
-import { AndroidFS } from '../NativePackages';
+import { AndroidFS, MicrophoneListener, MusicPosition } from '../NativePackages';
 
 import VexMusicContainer from '../main/VexMusicContainer';
 import Renderer from '../main/Renderer';
@@ -36,7 +36,27 @@ export default class ScoreScreen extends React.Component {
 
     this._showMenu = this._showMenu.bind(this);
     this._setMenuRef = this._setMenuRef.bind(this);
-    this._hideMenu = this._hideMenu.bind(this);
+
+    DeviceEventEmitter.addListener('onNewSoundData', (e)=>{ this.onNewSoundData(e);});
+    DeviceEventEmitter.addListener('onTactChanged', (e)=>{ this.onTactChanged(e);});
+  }
+
+  onNewSoundData(e){
+    var data = e.data;
+	MusicPosition.onNewSoundData(data)
+  }
+
+  onTactChanged(e){
+    if (e == Math.ceil(this.vexMusicContainer.stavesNumber / measuresPerStave)) {
+        this._stop();
+    }
+    else if ((e + 1) % this.renderer.options.stavesPerPage == 0) {
+        this._pageChanged(this.state.selectedPage + 1, true);
+    }
+    else {
+      this.setState({
+        selectedStave: e
+    });
   }
 
   componentDidMount() {
@@ -67,6 +87,9 @@ export default class ScoreScreen extends React.Component {
     .catch(reason => {
       ToastAndroid.show(reason.message, ToastAndroid.SHORT);
     });
+
+    MusicPosition.init(vexMusicContainer.allNotes)
+    MicrophoneListener.setBufferSize(2048 + 16);//тот самый размер буфера, который надо задавать
   }
 
   _setMenuRef(ref) {
@@ -162,6 +185,26 @@ export default class ScoreScreen extends React.Component {
     return measureTime;
   }
 
+  _startListener(){
+	 MicrophoneListener.start();
+  }
+
+  _stopListener(){
+	 MicrophoneListener.stop();
+  }
+
+  _start() {
+    if (this.state.useTimer)
+        _startTimer();
+    else
+        _startListener();
+  }
+
+  _stop() {
+    _stopTimer();
+    _stopListener();
+  }
+
   render() {
     const indices = [];
     for (let i = 1; i <= this.state.pages;++i)
@@ -187,8 +230,8 @@ export default class ScoreScreen extends React.Component {
             </View>)) : null }
         </View>
         <View style={styles.listenButton}>
-          { this.state.listening ? <Button title="Stop" onPress={() => this._stopTimer()} />
-          : <Button title="Listen" onPress={() => this._startTimer()}/> }
+          { this.state.listening ? <Button title="Stop" onPress={() => this._stop()} />
+          : <Button title="Listen" onPress={() => this._start()}/> }
         </View>
       </View>
     );
