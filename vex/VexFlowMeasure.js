@@ -9,7 +9,7 @@ export default class VexFlowMeasure {
         this.staveList = xmlMeasure.accept(vexConverter);
         this.beamList = [];
         this.page = -1;
-        this.staveList.forEach((stave, idx) => {
+        this.staveList.forEach((_, idx) => {
             this.voiceList.push([]);
             this.beamList.push([]);
             xmlMeasure.voices.forEach(voice => {

@@ -1,6 +1,7 @@
 import MusicXmlContainer from "../xml/MusicXmlContainer";
 import VexFlowMeasure from '../vex/VexFlowMeasure';
 import { vexConverter } from './MusicVisitor';
+import { ToastAndroid} from 'react-native';
 
 export default class VexMusicContainer {
     constructor() {
@@ -31,7 +32,7 @@ export default class VexMusicContainer {
                 stave.setX(x).setY(0).setWidth(staveWidth);//.setText(`stave #${counter}`, 3);
                 ++counter;
                 if ((number-1) % measuresPerStave === 0)
-                {
+                {   
                     let staveClef = vexMeasure.getClefByStaff(idx);
                     if (staveClef === undefined)
                         staveClef = 'treble';
@@ -48,6 +49,25 @@ export default class VexMusicContainer {
 
     getMeasuresOnPage(pageIdx) {
         return this.drawables.filter(drawable => drawable.page === pageIdx);
+    }
+
+    /*
+    src: vexflow/src/stavenote.js
+    duration
+    keys - 'note/octave' format
+    clef - google.com
+    isRest - whether it is a pause note
+    isChord - whether it is an accord
+    getDots - a note might have a dot assigned to it. It means that the note will be played + 0.5x of its original time
+    getAccidentals - they change a note's sound
+    */
+    get allNotes() {
+        const notesByMeasures = this.drawables.reduce((arr, measure, idx) => {
+            arr.push([]);
+            arr[idx].push(...measure.voiceList[0][0].tickables); //FIXME [0][0]
+            return arr;
+        }, []);
+        return notesByMeasures;
     }
 
     get stavesNumber() {
