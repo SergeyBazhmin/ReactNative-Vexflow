@@ -7,6 +7,11 @@ import com.facebook.react.bridge.ReactMethod;
 import com.facebook.react.modules.core.DeviceEventManagerModule;
 import java.lang.Class;
 import com.facebook.react.bridge.Arguments;
+import com.facebook.react.bridge.WritableMap;
+import com.facebook.react.bridge.ReadableMap;
+import com.facebook.react.bridge.WritableNativeArray;
+import com.facebook.react.bridge.ReadableNativeArray;
+import com.facebook.react.bridge.ReadableArray;
 
 public class MusicPosition extends ReactContextBaseJavaModule {
 
@@ -30,8 +35,9 @@ public class MusicPosition extends ReactContextBaseJavaModule {
         return "MusicPosition";
     }
 
-    public void init(Object notes/*, int tactTime*/) {
-        System.out.println(notes.getClass());
+    @ReactMethod
+    public void init(ReadableMap notes/*, int tactTime*/) {
+        //System.out.println(notes.getClass());
         //this.notes = notes;
         //this.tactTime = tactTime;
     }
@@ -76,10 +82,20 @@ public class MusicPosition extends ReactContextBaseJavaModule {
     }
 
     public void onTactChanged(int newTact) {
-        reactContext.getJSModule(DeviceEventManagerModule.RCTDeviceEventEmitter.class).emit("onTactChanged", newTact);
+        try {
+            reactContext.getJSModule(DeviceEventManagerModule.RCTDeviceEventEmitter.class).emit("onTactChanged", newTact);
+        } catch (Exception ex) {
+
+        }
     }
 
-    public void onNewSoundData(byte[] notes) {
-        musicTransformation.onNewData(notes);
+    @ReactMethod
+    public void onNewSoundData(ReadableMap newData) {
+        ReadableArray data = newData.getArray("data");
+        byte[] bytes = new byte[data.size()];
+        for (int i = 0; i < data.size(); i++) {
+            bytes[i] = (byte)data.getInt(i);
+        }
+        musicTransformation.onNewData(bytes);
     }
 }

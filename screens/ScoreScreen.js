@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Button, Picker, ToastAndroid, TouchableOpacity, StyleSheet, Text } from 'react-native';
+import { View, Button, Picker, ToastAndroid, TouchableOpacity, StyleSheet, Text, DeviceEventEmitter} from 'react-native';
 import { AndroidFS, MicrophoneListener, MusicPosition } from '../NativePackages';
 
 import VexMusicContainer from '../main/VexMusicContainer';
@@ -42,12 +42,11 @@ export default class ScoreScreen extends React.Component {
   }
 
   onNewSoundData(e){
-    var data = e.data;
-	MusicPosition.onNewSoundData(data)
+	MusicPosition.onNewSoundData(e)
   }
 
   onTactChanged(e){
-    if (e == Math.ceil(this.vexMusicContainer.stavesNumber / measuresPerStave)) {
+    if (e == Math.ceil(vexMusicContainer.stavesNumber / this.renderer.options.measuresPerStave)) {
         this._stop();
     }
     else if ((e + 1) % this.renderer.options.stavesPerPage == 0) {
@@ -56,7 +55,8 @@ export default class ScoreScreen extends React.Component {
     else {
       this.setState({
         selectedStave: e
-    });
+        });
+    }
   }
 
   componentDidMount() {
@@ -80,6 +80,9 @@ export default class ScoreScreen extends React.Component {
         this.renderer.formatter
       );
       const len = this.vexMusicContainer.drawables.length;
+      let notes = vexMusicContainer.allNotes;
+      //MusicPosition.init(notes)
+      //ToastAndroid.show(notesStr, ToastAndroid.LONG);
       this.setState({
         pages: this.vexMusicContainer.drawables[len-1].page+1
       });
@@ -88,8 +91,8 @@ export default class ScoreScreen extends React.Component {
       ToastAndroid.show(reason.message, ToastAndroid.SHORT);
     });
 
-    MusicPosition.init(vexMusicContainer.allNotes)
-    MicrophoneListener.setBufferSize(2048 + 16);//тот самый размер буфера, который надо задавать
+    MicrophoneListener.setBufferSize(2048 + 16);
+
   }
 
   _setMenuRef(ref) {
@@ -97,15 +100,7 @@ export default class ScoreScreen extends React.Component {
   }
 
   _hideMenu() {
-    this._menu.hide();
-    const notes = this.vexMusicContainer.allNotes; //new property
-    let str = '';
-    const measureIdx = 0;
-    notes[measureIdx].forEach(note => {
-       str += note.duration.toString();
-       //note.keys ... 'D/4', 'F/4' etc
-     });
-     ToastAndroid.show(str, ToastAndroid.SHORT);
+    //this._menu.hide();
   }
 
   _showMenu() {
@@ -134,16 +129,6 @@ export default class ScoreScreen extends React.Component {
   }
 
   _startTimer() {
-    this.setState({
-      listening: true
-    });
-    let curStave = this.state.selectedStave + 1;
-    if (this.state.selectedStave == -1) {
-      curStave = 1;
-      this.setState({
-        selectedStave: 0
-      });
-    }
     const { stavesPerPage, measuresPerStave } = this.renderer.options;
     let incr = this.state.selectedPage * stavesPerPage + curStave;
     const timeHandler = () => {
@@ -194,15 +179,26 @@ export default class ScoreScreen extends React.Component {
   }
 
   _start() {
+    this.setState({
+      listening: true
+    });
+    let curStave = this.state.selectedStave + 1;
+    if (this.state.selectedStave == -1) {
+      curStave = 1;
+      this.setState({
+        selectedStave: 0
+      });
+    }
+
     if (this.state.useTimer)
         _startTimer();
     else
-        _startListener();
+        this._startListener();
   }
 
   _stop() {
-    _stopTimer();
-    _stopListener();
+    this._stopTimer();
+    this._stopListener();
   }
 
   render() {
