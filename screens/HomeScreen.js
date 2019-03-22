@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { FileChooser, MicrophoneListener } from '../NativePackages';
+import { FileChooser } from '../NativePackages';
 import { View, Button, ToastAndroid, AsyncStorage } from 'react-native';
 import { ScrollView } from 'react-native-gesture-handler';
 import { Card } from 'react-native-elements';
@@ -15,21 +15,21 @@ export default class HomeScreen extends Component {
           items: []
       };
 	  
-	  MicrophoneListener.setBufferSize(1024);
-	  DeviceEventEmitter.addListener('onNewSoundData', (e)=>{ this.onNewSoundData(e);});
+	  //MicrophoneListener.setBufferSize(1024);
+	  //DeviceEventEmitter.addListener('onNewSoundData', (e)=>{ this.onNewSoundData(e);});
     }
 	
-    onNewSoundData(e) {
-      var data = e.data;
-    }
+    // onNewSoundData(e) {
+    //   var data = e.data;
+    // }
     
-    start() {
-      MicrophoneListener.start();
-    }
+    // start() {
+    //   MicrophoneListener.start();
+    // }
     
-    stop() {
-      MicrophoneListener.stop();
-    }
+    // stop() {
+    //   MicrophoneListener.stop();
+    // }
     
     async componentWillMount() {
         try {
