@@ -9,7 +9,7 @@ import java.util.HashSet;
 public class MusicTransformation {
 
     private final int SAMPLE_RATE = 44100;
-    private final int BYTES_IN_SAMPLE = 44100;
+    private final int BYTES_IN_SAMPLE = 2;
 
     private static NotesTable notesTable = new NotesTable();
     private MusicPosition position;
@@ -112,7 +112,7 @@ public class MusicTransformation {
     }
 
     public void onNewData(byte[] data) {
-
+        if (data.length == 0) return;
         double[] doubleNotes = new double[data.length / BYTES_IN_SAMPLE];
         for (int i = 0; i <= data.length - BYTES_IN_SAMPLE; i += BYTES_IN_SAMPLE) {
             byte[] bytes = Arrays.copyOfRange(data, i, i + BYTES_IN_SAMPLE);

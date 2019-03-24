@@ -46,7 +46,11 @@ export default class ScoreScreen extends React.Component {
   }
 
   onTactChanged(e){
-    if (e == Math.ceil(vexMusicContainer.stavesNumber / this.renderer.options.measuresPerStave)) {
+    if (e !== "-1")
+        ToastAndroid.show('Note ' + e, ToastAndroid.SHORT);
+    return;
+
+    if (e == Math.ceil(this.vexMusicContainer.stavesNumber / this.renderer.options.measuresPerStave)) {
         this._stop();
     }
     else if ((e + 1) % this.renderer.options.stavesPerPage == 0) {
@@ -80,7 +84,7 @@ export default class ScoreScreen extends React.Component {
         this.renderer.formatter
       );
       const len = this.vexMusicContainer.drawables.length;
-      let notes = vexMusicContainer.allNotes;
+      let notes = this.vexMusicContainer.allNotes;
       //MusicPosition.init(notes)
       //ToastAndroid.show(notesStr, ToastAndroid.LONG);
       this.setState({
@@ -91,7 +95,7 @@ export default class ScoreScreen extends React.Component {
       ToastAndroid.show(reason.message, ToastAndroid.SHORT);
     });
 
-    MicrophoneListener.setBufferSize(2048 + 16);
+    MicrophoneListener.setBufferSize((2048 + 16)*2);
 
   }
 
