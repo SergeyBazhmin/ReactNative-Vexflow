@@ -104,7 +104,15 @@ export default class ScoreScreen extends React.Component {
   }
 
   _hideMenu() {
-    //this._menu.hide();
+    this._menu.hide();
+    const measures = this.vexMusicContainer.allNotes; //new property
+    const notes = measures.map(m => m.map(note => note.keys.map(key => key.split('/')[0]))); //array of note characters
+    let str = '';
+    const measureIdx = 0;
+    notes[measureIdx].forEach(note => {
+       str += note.toString() + '\n';
+     });
+     ToastAndroid.show(str, ToastAndroid.SHORT);
   }
 
   _showMenu() {
