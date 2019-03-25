@@ -46,20 +46,20 @@ export default class ScoreScreen extends React.Component {
   }
 
   onTactChanged(e){
-    if (e !== "-1")
-        ToastAndroid.show('Note ' + e, ToastAndroid.SHORT);
-    return;
-
-    if (e == Math.ceil(this.vexMusicContainer.stavesNumber / this.renderer.options.measuresPerStave)) {
+    ToastAndroid.show('Tact  ' + e, ToastAndroid.LONG);
+    if (e + 1 == this.vexMusicContainer.stavesNumber * this.renderer.options.measuresPerStave) {
         this._stop();
     }
-    else if ((e + 1) % this.renderer.options.stavesPerPage == 0) {
+
+    if (e % (this.renderer.options.stavesPerPage * this.renderer.options.measuresPerStave) == 0) {
         this._pageChanged(this.state.selectedPage + 1, true);
     }
-    else {
+    else if (e % this.renderer.options.measuresPerStave == 0){
+      let stave = e / this.renderer.options.measuresPerStave;
+      stave = stave - this.state.selectedPage * this.renderer.options.stavesPerPage;
       this.setState({
-        selectedStave: e
-        });
+        selectedStave: stave
+      });
     }
   }
 
@@ -85,8 +85,10 @@ export default class ScoreScreen extends React.Component {
       );
       const len = this.vexMusicContainer.drawables.length;
       let notes = this.vexMusicContainer.allNotes;
-      //MusicPosition.init(notes)
-      //ToastAndroid.show(notesStr, ToastAndroid.LONG);
+
+      let measures = this.vexMusicContainer.allNotes; //new property
+      notes = measures.map(m => m.map(note => note.keys.map(key => key.split('/')[0]))); //array of note characters
+      MusicPosition.init(notes)
       this.setState({
         pages: this.vexMusicContainer.drawables[len-1].page+1
       });
@@ -96,7 +98,6 @@ export default class ScoreScreen extends React.Component {
     });
 
     MicrophoneListener.setBufferSize((2048 + 16)*2);
-
   }
 
   _setMenuRef(ref) {
@@ -105,14 +106,6 @@ export default class ScoreScreen extends React.Component {
 
   _hideMenu() {
     this._menu.hide();
-    const measures = this.vexMusicContainer.allNotes; //new property
-    const notes = measures.map(m => m.map(note => note.keys.map(key => key.split('/')[0]))); //array of note characters
-    let str = '';
-    const measureIdx = 0;
-    notes[measureIdx].forEach(note => {
-       str += note.toString() + '\n';
-     });
-     ToastAndroid.show(str, ToastAndroid.SHORT);
   }
 
   _showMenu() {
@@ -121,6 +114,8 @@ export default class ScoreScreen extends React.Component {
 
   _pageChanged(page, selectFirst=false) {
     ToastAndroid.show(page.toString(), ToastAndroid.SHORT);
+    if (!selectFirst)
+        this._updateMusicPosition(page, 0);
     this.setState({
       selectedPage: page,
       selectedStave: selectFirst ? 0 : -1,
@@ -128,7 +123,13 @@ export default class ScoreScreen extends React.Component {
     });
   }
 
+  _updateMusicPosition(page, stave) {
+    const { stavesPerPage, measuresPerStave } = this.renderer.options;
+    MusicPosition.setCurrentTact(page * stavesPerPage * measuresPerStave + stave * measuresPerStave);
+  }
+
   _stavePressed(id) {
+    this._updateMusicPosition(this.state.selectedPage, this.state.selectedStave == id ? 0 : id);
     this.setState({
       selectedStave: this.state.selectedStave == id ? -1 : id
     });
@@ -142,7 +143,11 @@ export default class ScoreScreen extends React.Component {
 
   _startTimer() {
     const { stavesPerPage, measuresPerStave } = this.renderer.options;
-    let incr = this.state.selectedPage * stavesPerPage + curStave;
+    let curStave = this.state.selectedStave + 1;
+    if (this.state.selectedStave == -1) {
+      curStave = 1;
+    }
+    let incr = this.state.selectedPage * stavesPerPage + this.curStave;
     const timeHandler = () => {
       if (incr == Math.ceil(this.vexMusicContainer.stavesNumber / measuresPerStave)) {
         this._stopTimer();
@@ -194,16 +199,14 @@ export default class ScoreScreen extends React.Component {
     this.setState({
       listening: true
     });
-    let curStave = this.state.selectedStave + 1;
     if (this.state.selectedStave == -1) {
-      curStave = 1;
       this.setState({
         selectedStave: 0
       });
     }
 
     if (this.state.useTimer)
-        _startTimer();
+        this._startTimer();
     else
         this._startListener();
   }

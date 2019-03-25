@@ -101,6 +101,9 @@ public class MusicTransformation {
     }
 
     private static Complex[] preprocessFrame(double[] frame) {
+        for (int i = 1; i < frame.length - 1; i++)
+            frame[i] = (frame[i] + frame[i - 1] + frame[i + 1])/3;
+
         for (int i = 0; i < frame.length; i++)
             frame[i] *= Window.Rectangle(frame[i], frame.length);
 
