@@ -15,22 +15,8 @@ export default class HomeScreen extends Component {
           items: []
       };
 	  
-	  //MicrophoneListener.setBufferSize(1024);
-	  //DeviceEventEmitter.addListener('onNewSoundData', (e)=>{ this.onNewSoundData(e);});
     }
-	
-    // onNewSoundData(e) {
-    //   var data = e.data;
-    // }
-    
-    // start() {
-    //   MicrophoneListener.start();
-    // }
-    
-    // stop() {
-    //   MicrophoneListener.stop();
-    // }
-    
+
     async componentWillMount() {
         try {
             const keys = await AsyncStorage.getAllKeys();

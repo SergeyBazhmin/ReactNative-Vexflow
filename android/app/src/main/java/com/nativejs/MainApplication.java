@@ -16,6 +16,7 @@ import java.util.List;
 
 import com.filechooser.FileChooserPackage;
 import com.nativejs.IOPackage;
+import com.nativejs.MusicAnalyzer.MusicAnalyzerPackage;
 
 public class MainApplication extends Application implements ReactApplication {
 
@@ -33,7 +34,8 @@ public class MainApplication extends Application implements ReactApplication {
           new RNGestureHandlerPackage(),
           new FileChooserPackage(),
           new IOPackage(),
-		  new MicrophonePackage()
+          new MicrophonePackage(),
+          new MusicAnalyzerPackage()
       );
     }
 

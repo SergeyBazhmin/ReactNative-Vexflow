@@ -1,6 +1,6 @@
 import React from 'react';
-import { View, Button, Picker, ToastAndroid, TouchableOpacity, StyleSheet, Text } from 'react-native';
-import { AndroidFS } from '../NativePackages';
+import { View, Button, Picker, ToastAndroid, TouchableOpacity, StyleSheet, Text, DeviceEventEmitter} from 'react-native';
+import { AndroidFS, MicrophoneListener, MusicPosition } from '../NativePackages';
 
 import VexMusicContainer from '../main/VexMusicContainer';
 import Renderer from '../main/Renderer';
@@ -36,7 +36,31 @@ export default class ScoreScreen extends React.Component {
 
     this._showMenu = this._showMenu.bind(this);
     this._setMenuRef = this._setMenuRef.bind(this);
-    this._hideMenu = this._hideMenu.bind(this);
+
+    DeviceEventEmitter.addListener('onNewSoundData', (e)=>{ this.onNewSoundData(e);});
+    DeviceEventEmitter.addListener('onTactChanged', (e)=>{ this.onTactChanged(e);});
+  }
+
+  onNewSoundData(e){
+	MusicPosition.onNewSoundData(e)
+  }
+
+  onTactChanged(e){
+    ToastAndroid.show('Tact  ' + e, ToastAndroid.LONG);
+    if (e + 1 == this.vexMusicContainer.stavesNumber * this.renderer.options.measuresPerStave) {
+        this._stop();
+    }
+
+    if (e % (this.renderer.options.stavesPerPage * this.renderer.options.measuresPerStave) == 0) {
+        this._pageChanged(this.state.selectedPage + 1, true);
+    }
+    else if (e % this.renderer.options.measuresPerStave == 0){
+      let stave = e / this.renderer.options.measuresPerStave;
+      stave = stave - this.state.selectedPage * this.renderer.options.stavesPerPage;
+      this.setState({
+        selectedStave: stave
+      });
+    }
   }
 
   componentDidMount() {
@@ -60,6 +84,11 @@ export default class ScoreScreen extends React.Component {
         this.renderer.formatter
       );
       const len = this.vexMusicContainer.drawables.length;
+      let notes = this.vexMusicContainer.allNotes;
+
+      let measures = this.vexMusicContainer.allNotes; //new property
+      notes = measures.map(m => m.map(note => note.keys.map(key => key.split('/')[0]))); //array of note characters
+      MusicPosition.init(notes)
       this.setState({
         pages: this.vexMusicContainer.drawables[len-1].page+1
       });
@@ -67,6 +96,8 @@ export default class ScoreScreen extends React.Component {
     .catch(reason => {
       ToastAndroid.show(reason.message, ToastAndroid.SHORT);
     });
+
+    MicrophoneListener.setBufferSize((2048 + 16)*2);
   }
 
   _setMenuRef(ref) {
@@ -75,14 +106,6 @@ export default class ScoreScreen extends React.Component {
 
   _hideMenu() {
     this._menu.hide();
-    const measures = this.vexMusicContainer.allNotes; //new property
-    const notes = measures.map(m => m.map(note => note.keys.map(key => key.split('/')[0]))); //array of note characters
-    let str = '';
-    const measureIdx = 0;
-    notes[measureIdx].forEach(note => {
-       str += note.toString() + '\n';
-     });
-     ToastAndroid.show(str, ToastAndroid.SHORT);
   }
 
   _showMenu() {
@@ -91,6 +114,8 @@ export default class ScoreScreen extends React.Component {
 
   _pageChanged(page, selectFirst=false) {
     ToastAndroid.show(page.toString(), ToastAndroid.SHORT);
+    if (!selectFirst)
+        this._updateMusicPosition(page, 0);
     this.setState({
       selectedPage: page,
       selectedStave: selectFirst ? 0 : -1,
@@ -98,7 +123,13 @@ export default class ScoreScreen extends React.Component {
     });
   }
 
+  _updateMusicPosition(page, stave) {
+    const { stavesPerPage, measuresPerStave } = this.renderer.options;
+    MusicPosition.setCurrentTact(page * stavesPerPage * measuresPerStave + stave * measuresPerStave);
+  }
+
   _stavePressed(id) {
+    this._updateMusicPosition(this.state.selectedPage, this.state.selectedStave == id ? 0 : id);
     this.setState({
       selectedStave: this.state.selectedStave == id ? -1 : id
     });
@@ -111,18 +142,12 @@ export default class ScoreScreen extends React.Component {
   }
 
   _startTimer() {
-    this.setState({
-      listening: true
-    });
+    const { stavesPerPage, measuresPerStave } = this.renderer.options;
     let curStave = this.state.selectedStave + 1;
     if (this.state.selectedStave == -1) {
       curStave = 1;
-      this.setState({
-        selectedStave: 0
-      });
     }
-    const { stavesPerPage, measuresPerStave } = this.renderer.options;
-    let incr = this.state.selectedPage * stavesPerPage + curStave;
+    let incr = this.state.selectedPage * stavesPerPage + this.curStave;
     const timeHandler = () => {
       if (incr == Math.ceil(this.vexMusicContainer.stavesNumber / measuresPerStave)) {
         this._stopTimer();
@@ -162,6 +187,35 @@ export default class ScoreScreen extends React.Component {
     return measureTime;
   }
 
+  _startListener(){
+	 MicrophoneListener.start();
+  }
+
+  _stopListener(){
+	 MicrophoneListener.stop();
+  }
+
+  _start() {
+    this.setState({
+      listening: true
+    });
+    if (this.state.selectedStave == -1) {
+      this.setState({
+        selectedStave: 0
+      });
+    }
+
+    if (this.state.useTimer)
+        this._startTimer();
+    else
+        this._startListener();
+  }
+
+  _stop() {
+    this._stopTimer();
+    this._stopListener();
+  }
+
   render() {
     const indices = [];
     for (let i = 1; i <= this.state.pages;++i)
@@ -187,8 +241,8 @@ export default class ScoreScreen extends React.Component {
             </View>)) : null }
         </View>
         <View style={styles.listenButton}>
-          { this.state.listening ? <Button title="Stop" onPress={() => this._stopTimer()} />
-          : <Button title="Listen" onPress={() => this._startTimer()}/> }
+          { this.state.listening ? <Button title="Stop" onPress={() => this._stop()} />
+          : <Button title="Listen" onPress={() => this._start()}/> }
         </View>
       </View>
     );
