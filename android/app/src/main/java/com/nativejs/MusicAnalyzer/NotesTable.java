@@ -22,31 +22,31 @@ public class NotesTable {
         double gaBase = 51.9130;
 
         NotesHashMap.put(Notes.A, new ArrayList<Double>());
-        NotesHashMap.put(Notes.A_B, new ArrayList<Double>());
+        //NotesHashMap.put(Notes.A_B, new ArrayList<Double>());
         NotesHashMap.put(Notes.B, new ArrayList<Double>());
         NotesHashMap.put(Notes.C, new ArrayList<Double>());
-        NotesHashMap.put(Notes.C_D, new ArrayList<Double>());
+        //NotesHashMap.put(Notes.C_D, new ArrayList<Double>());
         NotesHashMap.put(Notes.D, new ArrayList<Double>());
-        NotesHashMap.put(Notes.D_E, new ArrayList<Double>());
+        //NotesHashMap.put(Notes.D_E, new ArrayList<Double>());
         NotesHashMap.put(Notes.E, new ArrayList<Double>());
         NotesHashMap.put(Notes.F, new ArrayList<Double>());
-        NotesHashMap.put(Notes.F_G, new ArrayList<Double>());
+        //NotesHashMap.put(Notes.F_G, new ArrayList<Double>());
         NotesHashMap.put(Notes.G, new ArrayList<Double>());
-        NotesHashMap.put(Notes.G_A, new ArrayList<Double>());
+        //NotesHashMap.put(Notes.G_A, new ArrayList<Double>());
 
         for (int i = 1; i < 7; i++) {
             NotesHashMap.get(Notes.A).add(aBase * Math.pow(2, i));
-            NotesHashMap.get(Notes.A_B).add(abBase * Math.pow(2, i));
+            //NotesHashMap.get(Notes.A_B).add(abBase * Math.pow(2, i));
             NotesHashMap.get(Notes.B).add(bBase * Math.pow(2, i));
             NotesHashMap.get(Notes.C).add(cBase * Math.pow(2, i));
-            NotesHashMap.get(Notes.C_D).add(cdBase * Math.pow(2, i));
+            //NotesHashMap.get(Notes.C_D).add(cdBase * Math.pow(2, i));
             NotesHashMap.get(Notes.D).add(dBase * Math.pow(2, i));
-            NotesHashMap.get(Notes.D_E).add(deBase * Math.pow(2, i));
+            //NotesHashMap.get(Notes.D_E).add(deBase * Math.pow(2, i));
             NotesHashMap.get(Notes.E).add(eBase * Math.pow(2, i));
             NotesHashMap.get(Notes.F).add(fbBase * Math.pow(2, i));
-            NotesHashMap.get(Notes.F_G).add(fgBase * Math.pow(2, i));
+            //NotesHashMap.get(Notes.F_G).add(fgBase * Math.pow(2, i));
             NotesHashMap.get(Notes.G).add(gbBase * Math.pow(2, i));
-            NotesHashMap.get(Notes.G_A).add(gaBase * Math.pow(2, i));
+            //NotesHashMap.get(Notes.G_A).add(gaBase * Math.pow(2, i));
         }
     }
 }

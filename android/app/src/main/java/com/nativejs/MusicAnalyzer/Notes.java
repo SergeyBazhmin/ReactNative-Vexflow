@@ -2,15 +2,15 @@ package com.nativejs.MusicAnalyzer;
 
 public enum Notes {
     A,
-    A_B,
+    //A_B,
     B,
     C,
-    C_D,
+    //C_D,
     D,
-    D_E,
+    //D_E,
     E,
     F,
-    F_G,
+    //F_G,
     G,
-    G_A
+    //G_A
 }

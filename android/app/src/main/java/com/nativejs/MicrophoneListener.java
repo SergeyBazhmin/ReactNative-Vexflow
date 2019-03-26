@@ -115,8 +115,8 @@ public class MicrophoneListener extends ReactContextBaseJavaModule {
     }
 
     private AudioRecord findAudioRecord() {
-        for (int rate : new int[]{44100, 22050, 11025, 8000}) {
-            for (short audioFormat : new short[]{AudioFormat.ENCODING_PCM_8BIT, AudioFormat.ENCODING_PCM_16BIT}) {
+        for (int rate : new int[]{44100}) {
+            for (short audioFormat : new short[]{AudioFormat.ENCODING_PCM_16BIT}) {
                 try {
                     innerBufferSize = AudioRecord.getMinBufferSize(rate, AudioFormat.CHANNEL_IN_MONO, audioFormat);
 

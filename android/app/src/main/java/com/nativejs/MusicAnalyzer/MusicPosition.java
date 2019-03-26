@@ -1,6 +1,6 @@
 package com.nativejs.MusicAnalyzer;
 
-import com.facebook.react.bridge.Promise;
+import com.facebook.react.bridge.*;
 import com.facebook.react.bridge.ReactApplicationContext;
 import com.facebook.react.bridge.ReactContextBaseJavaModule;
 import com.facebook.react.bridge.ReactMethod;
@@ -13,16 +13,19 @@ import com.facebook.react.bridge.WritableNativeArray;
 import com.facebook.react.bridge.ReadableNativeArray;
 import com.facebook.react.bridge.ReadableArray;
 
+import java.util.HashMap;
+
 public class MusicPosition extends ReactContextBaseJavaModule {
 
+    public MusicTransformation musicTransformation;
     private Notes[][] notes;
     private Notes previousNote;
     private int currentTact = 0;
-    private int curentNoteInTact = 0;
+    private int curentNoteInTact = -1;
     private ReactApplicationContext reactContext;
     private int update = 0;
-
-    public MusicTransformation musicTransformation;
+    private HashMap<Notes, Integer> lastNotes;
+    private int noteCount = 0;
 
     public MusicPosition(ReactApplicationContext reactContext) {
         super(reactContext);
@@ -37,8 +40,10 @@ public class MusicPosition extends ReactContextBaseJavaModule {
 
     @ReactMethod
     public void init(ReadableArray notesArray) {
-        notes = new Notes[notesArray.size()][];
+        lastNotes = new HashMap<Notes, Integer>();
+        initLastNotes();
 
+        notes = new Notes[notesArray.size()][];
         for (int i = 0; i < notesArray.size(); i++) {
             ReadableArray iArr = notesArray.getArray(i);
             notes[i] = new Notes[iArr.size()];
@@ -49,6 +54,17 @@ public class MusicPosition extends ReactContextBaseJavaModule {
         }
     }
 
+    private void initLastNotes() {
+        lastNotes.clear();
+        lastNotes.put(Notes.A, 0);
+        lastNotes.put(Notes.B, 0);
+        lastNotes.put(Notes.C, 0);
+        lastNotes.put(Notes.D, 0);
+        lastNotes.put(Notes.E, 0);
+        lastNotes.put(Notes.F, 0);
+        lastNotes.put(Notes.G, 0);
+    }
+
     @ReactMethod
     public void setCurrentTact(int currentTact) {
         this.currentTact = currentTact;
@@ -56,6 +72,28 @@ public class MusicPosition extends ReactContextBaseJavaModule {
 
 
     public void updatePosition(Notes[] currentNote) {
+
+        if (currentNote.length != 1)
+            return;
+
+        lastNotes.put(currentNote[0], lastNotes.get(currentNote[0]) + 1);
+        noteCount++;
+        if (noteCount != 5) return;
+
+        int max = 0;
+        Notes note = Notes.A;
+        for (HashMap.Entry<Notes, Integer> entry : lastNotes.entrySet()) {
+            if (entry.getValue() > max) {
+                max = entry.getValue();
+                note = entry.getKey();
+            }
+        }
+
+        if (max < 2) return;
+
+        System.out.println("FOUND: " + note.name());
+        initLastNotes();
+        noteCount = 0;
 
         int notesInTact = notes[currentTact].length;
 
@@ -74,28 +112,31 @@ public class MusicPosition extends ReactContextBaseJavaModule {
 
         boolean found = false;
 
+        System.out.println("Next note: " + nextNote.name() + "; Next tact: " + nextTactIndex + "; Next note index: " + nextNoteIndex);
         for (int i = nextTactIndex; i < Math.min(notes.length, nextTactIndex + 1); i++) {
             for (int j = (i == nextTactIndex ? nextNoteIndex : 0); j < notes[i].length; j++) {
-                for (int k = 0; k < currentNote.length; k++) {
-                    if (notes[i][j] == currentNote[k]) {
-                        previousNote = currentNote[k];
-                        currentTact = i;
-                        curentNoteInTact = j;
-                        found = true;
-                        break;
-                    }
+                if (notes[i][j] == currentNote[0]) {
+                    previousNote = currentNote[0];
+                    currentTact = i;
+                    curentNoteInTact = j;
+                    found = true;
+                    break;
                 }
                 if (found) break;
             }
             if (found) break;
         }
 
-        //System.out.println("Next tact: " + nextTactIndex);
-        if (found && nextTactIndex != currentTact)
-            onTactChanged(currentTact);
+        notesInTact = notes[currentTact].length;
+        if (found)
+        {
+            if (curentNoteInTact == notesInTact - 1)
+                onTactChanged(currentTact + 1);
+            else
+                onTactChanged(currentTact);
+            System.out.println("Next tact: " + currentTact);
+        }
 
-        if (found && curentNoteInTact == notesInTact - 1)
-            onTactChanged(currentTact + 1);
     }
 
     public void onTactChanged(int newTact) {
@@ -111,7 +152,7 @@ public class MusicPosition extends ReactContextBaseJavaModule {
         ReadableArray data = newData.getArray("data");
         byte[] bytes = new byte[data.size()];
         for (int i = 0; i < data.size(); i++) {
-            bytes[i] = (byte)data.getInt(i);
+            bytes[i] = (byte) data.getInt(i);
         }
         musicTransformation.onNewData(bytes);
     }
