@@ -15,8 +15,8 @@ export default class ScoreScreen extends React.Component {
         <View style={{paddingRight: 10}}>
           <Menu ref={navigation.getParam('_setMenuRef')}
           button={<Text style={{fontSize: 20}} onPress={navigation.getParam('_showMenu')}>Mode</Text>}>
-                <MenuItem onPress={navigation.getParam('_hideMenu')}>Timer</MenuItem>
-                <MenuItem onPress={navigation.getParam('_hideMenu')}>Listen</MenuItem>
+                <MenuItem onPress={navigation.getParam('_setTimerMode')}>Timer</MenuItem>
+                <MenuItem onPress={navigation.getParam('_setListeningMode')}>Listen</MenuItem>
           </Menu>
         </View>
       ),
@@ -31,18 +31,22 @@ export default class ScoreScreen extends React.Component {
       staves: null,
       selectedStave: -1,
       bpm: 120,
-      listening: false
+      listening: false,
+      useTimer: true,
     };
 
     this._showMenu = this._showMenu.bind(this);
     this._setMenuRef = this._setMenuRef.bind(this);
+    this._setListeningMode = this._setListeningMode.bind(this);
+    this._setTimerMode = this._setTimerMode.bind(this);
+
 
     DeviceEventEmitter.addListener('onNewSoundData', (e)=>{ this.onNewSoundData(e);});
     DeviceEventEmitter.addListener('onTactChanged', (e)=>{ this.onTactChanged(e);});
   }
 
   onNewSoundData(e){
-	MusicPosition.onNewSoundData(e)
+	  MusicPosition.onNewSoundData(e)
   }
 
   onTactChanged(e){
@@ -67,7 +71,8 @@ export default class ScoreScreen extends React.Component {
     this.props.navigation.setParams({
       _setMenuRef: this._setMenuRef,
       _showMenu: this._showMenu,
-      _hideMenu: this._hideMenu
+      _setListeningMode: this._setListeningMode,
+      _setTimerMode: this._setTimerMode
     });
 
     this.vexMusicContainer = new VexMusicContainer();
@@ -104,7 +109,19 @@ export default class ScoreScreen extends React.Component {
     this._menu = ref;
   }
 
-  _hideMenu() {
+  _setTimerMode() {
+    ToastAndroid.show('Timer', ToastAndroid.SHORT);
+    this.setState({
+      useTimer: true
+    });
+    this._menu.hide();
+  }
+
+  _setListeningMode() {
+    ToastAndroid.show('Listening', ToastAndroid.SHORT);
+    this.setState({
+      useTimer: false
+    });
     this._menu.hide();
   }
 
@@ -113,7 +130,6 @@ export default class ScoreScreen extends React.Component {
   }
 
   _pageChanged(page, selectFirst=false) {
-    ToastAndroid.show(page.toString(), ToastAndroid.SHORT);
     if (!selectFirst)
         this._updateMusicPosition(page, 0);
     this.setState({
@@ -129,7 +145,7 @@ export default class ScoreScreen extends React.Component {
   }
 
   _stavePressed(id) {
-    this._updateMusicPosition(this.state.selectedPage, this.state.selectedStave == id ? 0 : id);
+    this._updateMusicPosition(this.state.selectedPage, this.state.selectedStave === id ? 0 : id);
     this.setState({
       selectedStave: this.state.selectedStave == id ? -1 : id
     });
@@ -143,16 +159,14 @@ export default class ScoreScreen extends React.Component {
 
   _startTimer() {
     const { stavesPerPage, measuresPerStave } = this.renderer.options;
-    let curStave = this.state.selectedStave + 1;
-    if (this.state.selectedStave == -1) {
-      curStave = 1;
-    }
-    let incr = this.state.selectedPage * stavesPerPage + this.curStave;
+    let curStave = this.state.selectedStave === -1 ? 1 : (this.state.selectedStave + 1);
+
+    let incr = this.state.selectedPage * stavesPerPage + curStave;
     const timeHandler = () => {
       if (incr == Math.ceil(this.vexMusicContainer.stavesNumber / measuresPerStave)) {
-        this._stopTimer();
+        this._stop();
       }
-      else if ((this.state.selectedStave+1) % this.renderer.options.stavesPerPage == 0) {
+      else if ((this.state.selectedStave+1) % this.renderer.options.stavesPerPage === 0) {
         this._pageChanged(this.state.selectedPage + 1, true);
       }
       else {
@@ -168,10 +182,6 @@ export default class ScoreScreen extends React.Component {
 
   _stopTimer() {
     clearInterval(this.intervalId);
-    this.setState({
-      listening:  false,
-      selectedStave: -1
-    });
   }
 
   _calculateTimeInterval() {
@@ -188,32 +198,34 @@ export default class ScoreScreen extends React.Component {
   }
 
   _startListener(){
-	 MicrophoneListener.start();
+	  MicrophoneListener.start();
   }
 
   _stopListener(){
-	 MicrophoneListener.stop();
+    MicrophoneListener.stop();
   }
 
   _start() {
     this.setState({
-      listening: true
-    });
-    if (this.state.selectedStave == -1) {
-      this.setState({
-        selectedStave: 0
-      });
-    }
-
-    if (this.state.useTimer)
+      listening: true,
+      selectedStave: this.state.selectedStave === -1 ? 0 : this.state.selectedStave
+    }, () => {
+      if (this.state.useTimer)
         this._startTimer();
-    else
+      else
         this._startListener();
+    });
   }
 
   _stop() {
-    this._stopTimer();
-    this._stopListener();
+    if (this.state.useTimer)
+      this._stopTimer();
+    else
+      this._stopListener();
+    this.setState({
+      listening:  false,
+      selectedStave: -1
+    });
   }
 
   render() {
