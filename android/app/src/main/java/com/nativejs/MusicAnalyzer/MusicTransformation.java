@@ -21,11 +21,6 @@ public class MusicTransformation {
     private static Notes[] getNotes(double[] frame, int sampleRate) {
         Double[] frequency = getFrequency(frame, sampleRate);
 
-        for (double freq : frequency) {
-            System.out.print(freq);
-            System.out.print(";");
-        }
-
         HashSet<Notes> notes = new HashSet<>();
 
         for (double freq : frequency) {
@@ -55,10 +50,13 @@ public class MusicTransformation {
         for (double value : spectrum.values())
             sum += value;
 
+        double max = -1;
         HashMap<Double, Double> bigFreg = new HashMap<>();
         for (HashMap.Entry<Double, Double> entry : spectrum.entrySet()) {
+            if (entry.getValue() > max)
+                max = entry.setValue(entry.getValue());
             entry.setValue(entry.getValue() / sum);
-            if (entry.getValue() > 0.05)
+            if (entry.getValue() > 0.07)
                 bigFreg.put(entry.getKey(), entry.getValue());
         }
 
@@ -72,30 +70,30 @@ public class MusicTransformation {
 
         Complex[] frame0 = preprocessFrame(frame);
         Complex[] frame1 = Arrays.copyOfRange(frame0, 0, frame.length - shift);
-        Complex[] frame2 = Arrays.copyOfRange(frame0, shift, frame.length);
+        //Complex[] frame2 = Arrays.copyOfRange(frame0, shift, frame.length);
 
         Complex[] spectrum1 = FFT.decimationInFrequency(frame1);
-        Complex[] spectrum2 = FFT.decimationInFrequency(frame2);
-        Complex complexSize = new Complex(frameSize, 0);
+        //Complex[] spectrum2 = FFT.decimationInFrequency(frame2);
+        //Complex complexSize = new Complex(frameSize, 0);
 
-        for (int i = 0; i < frameSize; i++) {
-            spectrum1[i].Division(complexSize);
-            spectrum2[i].Division(complexSize);
-        }
-
-        //double k = sampleRate / spectrum1.length;
-
-        //HashMap<Double, Double> spectrum = new HashMap<>();
-
-        //for (int i = 0; i < spectrum1.length; i++) {
-          //  Complex entry = spectrum1[i];
-            //double abs = entry.getMagnitude();
-            //spectrum.put(i * k, abs);
+        //for (int i = 0; i < frameSize; i++) {
+            //spectrum1[i].Division(complexSize);
+            //spectrum2[i].Division(complexSize);
         //}
 
+        double k = sampleRate / spectrum1.length;
 
-        HashMap<Double, Double> spectrum = Filters.GetJoinedSpectrum(spectrum1, spectrum2, shift, sampleRate);
-        spectrum = Filters.AntiAliasing(spectrum);
+        HashMap<Double, Double> spectrum = new HashMap<>();
+
+        for (int i = 0; i < spectrum1.length; i++) {
+            Complex entry = spectrum1[i];
+            double abs = entry.getMagnitude();
+            spectrum.put(i * k, abs);
+        }
+
+
+        //HashMap<Double, Double> spectrum = Filters.GetJoinedSpectrum(spectrum1, spectrum2, shift, sampleRate);
+        //spectrum = Filters.AntiAliasing(spectrum);
 
         return spectrum;
     }
